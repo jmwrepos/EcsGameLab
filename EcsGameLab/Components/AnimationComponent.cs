@@ -4,12 +4,15 @@ namespace EcsGameLab.Components
 {
     public abstract class AnimationComponent : Component
     {
+        protected AnimationComponent(bool expires) : base(expires)
+        {
+        }
+
         public bool HasStarted { get; set; }
         public bool HasFinished { get; set; }
         public int RenderOrder { get; set; }
         public double Duration { get; set; }
         public double StartTime { get; set; } = -1;
-        public AnimationComponent StartAfter { get; set; }
 
         // You might have common animation properties or methods here
         public virtual void StartAnimation(GameTime gameTime) { }
@@ -20,9 +23,9 @@ namespace EcsGameLab.Components
             HasStarted = false;
         }
 
-        public virtual void SetStartAfter(AnimationComponent component)
+        public override void Update(GameTime gameTime)
         {
-            StartAfter = component;
+            base.Update(gameTime);
         }
     }
 }

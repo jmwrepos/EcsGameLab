@@ -1,4 +1,5 @@
 ﻿using EcsGameLab.Components;
+using EcsGameLab.Statics;
 using EcsGameLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -9,40 +10,36 @@ namespace EcsGameLab.Systems.MainMenuSys
 {
     public class MainMenuSystem
     {
-        private readonly GraphicsDeviceManager _gdm;
         public List<GameObject> Entities { get; set; }
         private int DisplayWidth { get; set; }
         private int DisplayHeight { get; set; }
-        private int RenderOrder { get; set; } = 0;
-        public MainMenuSystem(GraphicsDeviceManager gdm)
+
+        public void LoadContent()
         {
-            _gdm = gdm;
+            var display = GraphicsLib.GetDisplaySize;
+            DisplayWidth = (int)display.X;
+            DisplayHeight = (int)display.Y;
+
+            var object1 = CreateGameObject("obj1", GraphicsLib.Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
+            var object2 = CreateGameObject("obj2", GraphicsLib.Pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
+            var title = CreateGameObject("title", GraphicsLib.GetStatic("mainMenuNew"), 2, Color.Transparent, Color.Black);
+
+            var animationMan = new GameObject();
+            var animationTree = new AnimationTreeComponent(true);
+            animationMan.AddComponent(animationTree);
+
+            var a1 = object1.GetComponent<FadeAnimationComponent>();
+            var a2 = object2.GetComponent<FadeAnimationComponent>();
+            var a3 = title.GetComponent<FadeAnimationComponent>();
+
+            animationTree.AddAnimationNode(a1);
+            animationTree.AddAnimationNode(a2, a1);
+            animationTree.AddAnimationNode(a3, a2);
+
+            title.AddComponent(new AlignmentComponent(true, 0.1f, 0.5f));
+            Entities = new() { object1, object2, title, animationMan };
         }
 
-        public void LoadContent(ContentManager content)
-        {
-            DisplayWidth = _gdm.PreferredBackBufferWidth;
-            DisplayHeight = _gdm.PreferredBackBufferHeight;
-            var graphics = _gdm.GraphicsDevice;
-
-            Texture2D pixel = new Texture2D(graphics, 1, 1);
-            pixel.SetData(new[] { Color.White });
-
-            Texture2D titleTexture = content.Load<Texture2D>("statics/mainMenuNew");
-            var object1 = CreateGameObject("obj1", pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
-            var object2 = CreateGameObject("obj2", pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
-            var title = CreateGameObject("title", titleTexture, 2, Color.Transparent, Color.Black);
-
-            title.AddComponent(new AlignmentComponent(0.1f, 0.5f, _gdm));
-            Entities = new() { object1, object2, title};
-
-            SetStartAfter(object1, object2);
-            SetStartAfter(object2, title);
-        }
-
-        private void SetStartAfter(GameObject obj1, GameObject obj2) =>
-            obj2.GetComponent<AnimationComponent>().SetStartAfter(
-                obj1.GetComponent<AnimationComponent>());
 
         public GameObject CreateGameObject(string name, Texture2D texture, int renderOrder, Color startColor, Color endColor)
         {
@@ -51,7 +48,7 @@ namespace EcsGameLab.Systems.MainMenuSys
         public GameObject CreateGameObject(string name, Texture2D texture, int renderOrder, Color startColor, Color endColor, Vector2 position, Vector2 size)
         {
             var obj = new GameObject() { Name = name };
-            TextureComponent txt = new(_gdm.GraphicsDevice, texture);
+            TextureComponent txt = new(texture);
             FadeAnimationComponent fadeIn = new(startColor, endColor, 0.61, renderOrder);
             ColorComponent clr = new(startColor);
 
@@ -83,7 +80,7 @@ namespace EcsGameLab.Systems.MainMenuSys
                     {
                         comp.Update(gameTime);
                     }
-                    if (comp.Destroy)
+                    if (comp.IsExpired)
                     {
                         ToDestroy.Add(comp);
                     }
@@ -98,13 +95,9 @@ namespace EcsGameLab.Systems.MainMenuSys
         private void UpdateAnimations(GameObject obj, GameTime gameTime)
         {
             var fade = obj.GetComponent<FadeAnimationComponent>();
-            if (!fade.HasFinished && fade.RenderOrder == RenderOrder)
+            if(fade.HasStarted && !fade.HasFinished)
             {
                 fade.Update(gameTime);
-                if (fade.HasFinished)
-                {
-                    RenderOrder++;
-                }
             }
         }
 
@@ -124,8 +117,6 @@ namespace EcsGameLab.Systems.MainMenuSys
 
             if (textureComponent != null && colorComponent != null && transformComponent != null)
             {
-                // Use the Bounds property for drawing which includes both position and size,
-                // allowing the texture to be resized and stretched accordingly
                 spriteBatch.Draw(
                     textureComponent.Texture,
                     destinationRectangle: transformComponent.Bounds,

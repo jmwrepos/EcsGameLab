@@ -1,4 +1,5 @@
-﻿using EcsGameLab.Systems.MainMenuSys;
+﻿using EcsGameLab.Statics;
+using EcsGameLab.Systems.MainMenuSys;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,7 +17,7 @@ namespace EcsGameLab
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            _mainMenuSystem = new(_graphics);
+            _mainMenuSystem = new();
 
             _graphics.PreferredBackBufferWidth = 1920;
             _graphics.PreferredBackBufferWidth = 1080;
@@ -31,9 +32,13 @@ namespace EcsGameLab
 
         protected override void LoadContent()
         {
+            //setters
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _mainMenuSystem.LoadContent(Content);
-            // TODO: use this.Content to load your game content here
+            GraphicsLib.SetManagers(Content, _graphics);
+            GraphicsLib.SetPixel();
+            //loading
+            _mainMenuSystem.LoadContent();
+            
         }
 
         protected override void Update(GameTime gameTime)

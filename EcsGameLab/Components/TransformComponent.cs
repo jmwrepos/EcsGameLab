@@ -7,6 +7,10 @@ namespace EcsGameLab.Components
         private Vector2 _position;
         private Vector2 _size;
 
+        public TransformComponent(bool expires = false) : base(expires)
+        {
+        }
+
         public Vector2 Position
         {
             get => _position;

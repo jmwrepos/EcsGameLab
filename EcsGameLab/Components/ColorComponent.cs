@@ -6,7 +6,7 @@ namespace EcsGameLab.Components
     {
         public Color Color { get; set; } = Color.White;
 
-        public ColorComponent(Color color)
+        public ColorComponent(Color color, bool expires = false) : base(expires)
         {
             Color = color;
         }

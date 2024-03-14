@@ -7,7 +7,7 @@ namespace EcsGameLab.Components
     {
         public Color StartColor { get; set; }
         public Color EndColor { get; set; }
-        public FadeAnimationComponent(Color startColor, Color endColor, double duration, int renderOrder)
+        public FadeAnimationComponent(Color startColor, Color endColor, double duration, int renderOrder, bool expires = true) : base(expires)
         {
             StartColor = startColor;
             EndColor = endColor;
@@ -17,28 +17,22 @@ namespace EcsGameLab.Components
         }
         public override void Update(GameTime gameTime)
         {
-            if (!HasStarted)
+            if(HasStarted && !HasFinished)
             {
-                if ((StartAfter != null && StartAfter.HasFinished) || RenderOrder == 0)
+                double elapsedTime = gameTime.TotalGameTime.TotalSeconds - StartTime;
+                double progress = Math.Min(1, elapsedTime / Duration);
+                Color currentColor = Color.Lerp(StartColor, EndColor, (float)progress);
+                var colorComponent = Owner?.GetComponent<ColorComponent>();
+                if (colorComponent != null)
                 {
-                    EscLabLogger.Log($"Starting Animation for {Owner.Name}");
-                    StartAnimation(gameTime); return;
+                    colorComponent.Color = currentColor;
                 }
-            } // Animation not started yet or finished
-            if (StartTime < 0 || HasFinished) return;
-            double elapsedTime = gameTime.TotalGameTime.TotalSeconds - StartTime;
-            double progress = Math.Min(1, elapsedTime / Duration);
-            Color currentColor = Color.Lerp(StartColor, EndColor, (float)progress);
-            var colorComponent = Owner?.GetComponent<ColorComponent>();
-            if (colorComponent != null)
-            {
-                colorComponent.Color = currentColor;
-            }
 
-            if (progress >= 1)
-            {
-                HasFinished = true;
-                EscLabLogger.Log($"Ending Animation for {Owner.Name}");
+                if (progress >= 1)
+                {
+                    HasFinished = true;
+                    EscLabLogger.Log($"Ending Animation for {Owner.Name}");
+                }
             }
         }
 

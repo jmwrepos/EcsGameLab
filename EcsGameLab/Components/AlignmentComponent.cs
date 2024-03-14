@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using EcsGameLab.Statics;
+using Microsoft.Xna.Framework;
 
 namespace EcsGameLab.Components
 {
@@ -7,26 +8,24 @@ namespace EcsGameLab.Components
         //scale 0 to 1 for % of display height / width
         public float Vertical { get; set; }
         public float Horizontal { get; set; }
-        private GraphicsDeviceManager _gdm;
-
-        public AlignmentComponent(float v, float h, GraphicsDeviceManager gdm)
+        public AlignmentComponent(bool expires, float v, float h) : base(expires)
         {
-            _gdm = gdm;
             Vertical = v;
             Horizontal = h;
         }
 
         public override void Update(GameTime gameTime)
         {
-            if (!Destroy)
+            if (!IsExpired)
             {
                 var transform = Owner.GetComponent<TransformComponent>();
                 if (transform == null) return; // Ensure the transform component exists
 
                 float ownerWidth = transform.Bounds.Width;
                 float ownerHeight = transform.Bounds.Height;
-                float displayWidth = _gdm.PreferredBackBufferWidth;
-                float displayHeight = _gdm.PreferredBackBufferHeight;
+                var display = GraphicsLib.GetDisplaySize;
+                float displayWidth = display.X;
+                float displayHeight = display.Y;
 
                 // Calculate new positions
                 float newX = Horizontal * (displayWidth - ownerWidth);

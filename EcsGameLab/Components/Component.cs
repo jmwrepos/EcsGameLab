@@ -1,19 +1,28 @@
 ﻿using EcsGameLib;
 using Microsoft.Xna.Framework;
 
-namespace EcsGameLab
+namespace EcsGameLab.Components
 {
     public abstract class Component
     {
         public GameObject Owner { get; set; }
-        public bool Destroy { get; set; }
+        public bool Expires { get; set; }
+        public bool IsExpired { get; set; }
+        public Component(bool expires)
+        {
+            Expires = expires;
+        }
 
         // Initialize the component.
         public virtual void Initialize() { }
 
         // Terminate the component.
-        public virtual void Terminate() {
-            Destroy = true;
+        public virtual void Terminate()
+        {
+            if (Expires)
+            {
+                IsExpired = true;
+            }
         }
 
         // Update the component.
