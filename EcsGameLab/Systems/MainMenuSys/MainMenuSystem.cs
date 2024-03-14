@@ -2,7 +2,6 @@
 using EcsGameLab.Statics;
 using EcsGameLib;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
@@ -13,21 +12,27 @@ namespace EcsGameLab.Systems.MainMenuSys
         public List<GameObject> Entities { get; set; }
         private int DisplayWidth { get; set; }
         private int DisplayHeight { get; set; }
-
         public void LoadContent()
         {
+            //set display propertie
             var display = GraphicsLib.GetDisplaySize;
             DisplayWidth = (int)display.X;
             DisplayHeight = (int)display.Y;
 
+            //load textures for subsequent sections:
+            var titleTexture = GraphicsLib.MakeTextureFromText("gameTitle", "These Levels", Color.Black, Color.Transparent);
+
+            //create objects
             var object1 = CreateGameObject("obj1", GraphicsLib.Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
             var object2 = CreateGameObject("obj2", GraphicsLib.Pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
-            var title = CreateGameObject("title", GraphicsLib.GetStatic("mainMenuNew"), 2, Color.Transparent, Color.Black);
-
+            var title = CreateGameObject("title", titleTexture, 2, Color.Transparent, Color.Black);
             var animationMan = new GameObject();
+
+            //create animation tree component to manage the menu fade in
             var animationTree = new AnimationTreeComponent(true);
             animationMan.AddComponent(animationTree);
 
+            //
             var a1 = object1.GetComponent<FadeAnimationComponent>();
             var a2 = object2.GetComponent<FadeAnimationComponent>();
             var a3 = title.GetComponent<FadeAnimationComponent>();
@@ -49,7 +54,7 @@ namespace EcsGameLab.Systems.MainMenuSys
         {
             var obj = new GameObject() { Name = name };
             TextureComponent txt = new(texture);
-            FadeAnimationComponent fadeIn = new(startColor, endColor, 0.61, renderOrder);
+            FadeAnimationComponent fadeIn = new(Naming.FadeIn, startColor, endColor, 0.61);
             ColorComponent clr = new(startColor);
 
             // Ensure that Bounds is properly initialized with position and size

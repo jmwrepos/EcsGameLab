@@ -19,6 +19,31 @@ namespace EcsGameLab.Statics
         public static Texture2D GetStatic(string name) => _content?.Load<Texture2D>(StaticsRoot + name);
         public static Texture2D GetAnimation(string name) => _content?.Load<Texture2D>(AnimationsRoot + name);
         public static Texture2D Pixel { get; private set; }
+        public static Texture2D MakeTextureFromText(string fontName, string text, Color fore, Color back)
+        {
+            var font = _content.Load<SpriteFont>(FontRoot + fontName);
+            var textSize = font.MeasureString(text);
+
+            // Create a RenderTarget to draw the text onto
+            RenderTarget2D renderTarget = new RenderTarget2D(
+                _graphics.GraphicsDevice,
+                (int)textSize.X,
+                (int)textSize.Y);
+
+            _graphics.GraphicsDevice.SetRenderTarget(renderTarget);
+            _graphics.GraphicsDevice.Clear(back);
+
+            // Begin drawing
+            SpriteBatch spriteBatch = new SpriteBatch(_graphics.GraphicsDevice);
+            spriteBatch.Begin();
+            spriteBatch.DrawString(font, text, Vector2.Zero, fore);
+            spriteBatch.End();
+
+            // Reset the render target
+            _graphics.GraphicsDevice.SetRenderTarget(null);
+
+            return renderTarget;
+        }
 
         public static string FontRoot = "fonts/";
         public static string StaticsRoot = "statics/";

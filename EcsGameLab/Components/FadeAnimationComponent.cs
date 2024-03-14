@@ -7,12 +7,11 @@ namespace EcsGameLab.Components
     {
         public Color StartColor { get; set; }
         public Color EndColor { get; set; }
-        public FadeAnimationComponent(Color startColor, Color endColor, double duration, int renderOrder, bool expires = true) : base(expires)
+        public FadeAnimationComponent(string name, Color startColor, Color endColor, double duration, bool expires = true) : base(expires, name)
         {
             StartColor = startColor;
             EndColor = endColor;
             Duration = duration;
-            RenderOrder = renderOrder;
             Reset();
         }
         public override void Update(GameTime gameTime)

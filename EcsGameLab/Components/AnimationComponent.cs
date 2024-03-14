@@ -4,13 +4,14 @@ namespace EcsGameLab.Components
 {
     public abstract class AnimationComponent : Component
     {
-        protected AnimationComponent(bool expires) : base(expires)
+        protected AnimationComponent(bool expires, string name) : base(expires)
         {
+            Name = name;
         }
 
+        public string Name { get; set; }
         public bool HasStarted { get; set; }
         public bool HasFinished { get; set; }
-        public int RenderOrder { get; set; }
         public double Duration { get; set; }
         public double StartTime { get; set; } = -1;
 
