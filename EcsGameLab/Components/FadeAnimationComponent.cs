@@ -3,15 +3,10 @@ using System;
 
 namespace EcsGameLab.Components
 {
-    public class FadeAnimationComponent : Component
+    public class FadeAnimationComponent : AnimationComponent
     {
-        public Color StartColor { get; set; } // Start color
-        public Color EndColor { get; set; } // Target color
-        public double Duration { get; set; }
-        public double StartTime { get; set; } = -1; // Initialize with -1 to indicate animation hasn't started
-        public bool HasFinished { get; private set; }
-        public int RenderOrder { get; set; }
-
+        public Color StartColor { get; set; }
+        public Color EndColor { get; set; }
         public FadeAnimationComponent(Color startColor, Color endColor, double duration, int renderOrder)
         {
             StartColor = startColor;
@@ -20,17 +15,20 @@ namespace EcsGameLab.Components
             RenderOrder = renderOrder;
             Reset();
         }
-
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            if (StartTime < 0) return; // Animation not started yet
-
+            if (!HasStarted)
+            {
+                if ((StartAfter != null && StartAfter.HasFinished) || RenderOrder == 0)
+                {
+                    EscLabLogger.Log($"Starting Animation for {Owner.Name}");
+                    StartAnimation(gameTime); return;
+                }
+            } // Animation not started yet or finished
+            if (StartTime < 0 || HasFinished) return;
             double elapsedTime = gameTime.TotalGameTime.TotalSeconds - StartTime;
-            double progress = Math.Min(1, elapsedTime / Duration); // Ensure progress does not exceed 1
-
-            // Interpolate between StartColor and EndColor based on the progress
+            double progress = Math.Min(1, elapsedTime / Duration);
             Color currentColor = Color.Lerp(StartColor, EndColor, (float)progress);
-
             var colorComponent = Owner?.GetComponent<ColorComponent>();
             if (colorComponent != null)
             {
@@ -40,21 +38,18 @@ namespace EcsGameLab.Components
             if (progress >= 1)
             {
                 HasFinished = true;
+                EscLabLogger.Log($"Ending Animation for {Owner.Name}");
             }
         }
 
-        public void StartAnimation(GameTime gameTime)
+        public override void StartAnimation(GameTime gameTime)
         {
-            if (StartTime < 0) // Animation not yet started
+            if (StartTime < 0) // Check if the animation has not started yet
             {
                 StartTime = gameTime.TotalGameTime.TotalSeconds;
+                HasStarted = true;
             }
         }
 
-        public void Reset()
-        {
-            StartTime = -1;
-            HasFinished = false;
-        }
     }
 }

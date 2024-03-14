@@ -17,6 +17,10 @@ namespace EcsGameLab
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             _mainMenuSystem = new(_graphics);
+
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferWidth = 1080;
+            _graphics.ApplyChanges();
         }
 
         protected override void Initialize()
