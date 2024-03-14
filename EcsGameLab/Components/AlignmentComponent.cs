@@ -12,6 +12,8 @@ namespace EcsGameLab.Components
         public AlignmentComponent(float v, float h, GraphicsDeviceManager gdm)
         {
             _gdm = gdm;
+            Vertical = v;
+            Horizontal = h;
         }
 
         public override void Update(GameTime gameTime)
@@ -33,7 +35,6 @@ namespace EcsGameLab.Components
                 // Set the new position, aligning based on the calculations above
                 // The position will adjust so that the object aligns according to the specified percentages
                 transform.Position = new(newX, newY);
-
                 // Optional: Terminate this component if its job is done and it's no longer needed
                 Terminate();
             }

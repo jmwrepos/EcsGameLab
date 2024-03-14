@@ -28,29 +28,37 @@ namespace EcsGameLab.Systems.MainMenuSys
             Texture2D pixel = new Texture2D(graphics, 1, 1);
             pixel.SetData(new[] { Color.White });
 
-            TextureComponent titleTexture = new(graphics, content.Load<Texture2D>("statics/mainMenuNew"), new(200,50));
+            Texture2D titleTexture = content.Load<Texture2D>("statics/mainMenuNew");
             var object1 = CreateGameObject("obj1", pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
-            var object2 = CreateGameObject("obj2", pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));          
-            Entities = new() { object1, object2 };
+            var object2 = CreateGameObject("obj2", pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
+            var title = CreateGameObject("title", titleTexture, 2, Color.Transparent, Color.Black);
+
+            title.AddComponent(new AlignmentComponent(0.1f, 0.5f, _gdm));
+            Entities = new() { object1, object2, title};
 
             SetStartAfter(object1, object2);
+            SetStartAfter(object2, title);
         }
 
         private void SetStartAfter(GameObject obj1, GameObject obj2) =>
             obj2.GetComponent<AnimationComponent>().SetStartAfter(
                 obj1.GetComponent<AnimationComponent>());
 
+        public GameObject CreateGameObject(string name, Texture2D texture, int renderOrder, Color startColor, Color endColor)
+        {
+            return CreateGameObject(name, texture, renderOrder, startColor, endColor, Vector2.Zero, new(texture.Width, texture.Height));
+        }
         public GameObject CreateGameObject(string name, Texture2D texture, int renderOrder, Color startColor, Color endColor, Vector2 position, Vector2 size)
         {
             var obj = new GameObject() { Name = name };
-            TextureComponent txt = new(_gdm.GraphicsDevice, texture, size);
+            TextureComponent txt = new(_gdm.GraphicsDevice, texture);
             FadeAnimationComponent fadeIn = new(startColor, endColor, 0.61, renderOrder);
             ColorComponent clr = new(startColor);
 
             // Ensure that Bounds is properly initialized with position and size
             TransformComponent trans = new();
             trans.Size = new(size.X, size.Y);
-            trans.Position = new(position.X, position.Y); 
+            trans.Position = new(position.X, position.Y);
 
             obj.AddComponent(txt);
             obj.AddComponent(fadeIn);
@@ -59,8 +67,10 @@ namespace EcsGameLab.Systems.MainMenuSys
             return obj;
         }
 
+        private List<Component> ToDestroy = new();
         public void Update(GameTime gameTime)
         {
+            ToDestroy.Clear();
             foreach(GameObject obj in Entities)
             {
                 foreach(Component comp  in obj.Components)
@@ -69,7 +79,19 @@ namespace EcsGameLab.Systems.MainMenuSys
                     {
                         UpdateAnimations(obj, gameTime);
                     }
+                    else
+                    {
+                        comp.Update(gameTime);
+                    }
+                    if (comp.Destroy)
+                    {
+                        ToDestroy.Add(comp);
+                    }
                 }
+            }
+            foreach(Component toDestroy in ToDestroy)
+            {
+                toDestroy.Owner.Components.Remove(toDestroy);
             }
         }
 
