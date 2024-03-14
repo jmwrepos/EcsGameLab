@@ -21,28 +21,46 @@ namespace EcsGameLab.Systems.MainMenuSys
 
             //load textures for subsequent sections:
             var titleTexture = GraphicsLib.MakeTextureFromText("gameTitle", "These Levels", Color.Black, Color.Transparent);
+            var newTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "New", Color.Black, Color.Transparent);
+            var continueTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Continue", Color.Black, Color.Transparent);
+            var quitTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Quit", Color.Black, Color.Transparent);
 
             //create objects
-            var object1 = CreateGameObject("obj1", GraphicsLib.Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
-            var object2 = CreateGameObject("obj2", GraphicsLib.Pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
+            var bg1 = CreateGameObject("bg1", GraphicsLib.Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
+            var bg2 = CreateGameObject("bg2", GraphicsLib.Pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
             var title = CreateGameObject("title", titleTexture, 2, Color.Transparent, Color.Black);
+            var newG = CreateGameObject("new", newTexture, 2, Color.Transparent, Color.Black);
+            var contG = CreateGameObject("continue", continueTexture, 2, Color.Transparent, Color.Black);
+            var quitG = CreateGameObject("quit", quitTexture, 2, Color.Transparent, Color.Black);
             var animationMan = new GameObject();
 
             //create animation tree component to manage the menu fade in
             var animationTree = new AnimationTreeComponent(true);
             animationMan.AddComponent(animationTree);
 
-            //
-            var a1 = object1.GetComponent<FadeAnimationComponent>();
-            var a2 = object2.GetComponent<FadeAnimationComponent>();
+            //assign animations
+            var a1 = bg1.GetComponent<FadeAnimationComponent>();
+            var a2 = bg2.GetComponent<FadeAnimationComponent>();
             var a3 = title.GetComponent<FadeAnimationComponent>();
+            var a4 = newG.GetComponent<FadeAnimationComponent>();
+            var a5 = contG.GetComponent<FadeAnimationComponent>();
+            var a6 = quitG.GetComponent<FadeAnimationComponent>();
 
             animationTree.AddAnimationNode(a1);
             animationTree.AddAnimationNode(a2, a1);
             animationTree.AddAnimationNode(a3, a2);
+            animationTree.AddAnimationNode(a4, a2);
+            animationTree.AddAnimationNode(a5, a2);
+            animationTree.AddAnimationNode(a6, a2);
 
+            //alignments
             title.AddComponent(new AlignmentComponent(true, 0.1f, 0.5f));
-            Entities = new() { object1, object2, title, animationMan };
+            newG.AddComponent(new AlignmentComponent(true, 0.5f, 0.5f));
+            contG.AddComponent(new AlignmentComponent(true, 0.6f, 0.5f));
+            quitG.AddComponent(new AlignmentComponent(true, 0.7f, 0.5f));
+
+            //set entities
+            Entities = new() { bg1, bg2, title, animationMan, newG, contG, quitG };
         }
 
 
