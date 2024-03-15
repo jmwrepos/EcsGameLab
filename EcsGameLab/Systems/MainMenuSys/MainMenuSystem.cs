@@ -56,8 +56,8 @@ namespace EcsGameLab.Systems.MainMenuSys
             //alignments
             title.AddComponent(new AlignmentComponent(true, 0.1f, 0.5f));
             newG.AddComponent(new AlignmentComponent(true, 0.5f, 0.5f));
-            contG.AddComponent(new AlignmentComponent(true, 0.6f, 0.5f));
-            quitG.AddComponent(new AlignmentComponent(true, 0.7f, 0.5f));
+            contG.AddComponent(new AlignmentComponent(true, 0.65f, 0.5f));
+            quitG.AddComponent(new AlignmentComponent(true, 0.8f, 0.5f));
 
             //set entities
             Entities = new() { bg1, bg2, title, animationMan, newG, contG, quitG };
