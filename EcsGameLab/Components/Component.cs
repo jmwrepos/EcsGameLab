@@ -5,6 +5,7 @@ namespace EcsGameLab.Components
 {
     public abstract class Component
     {
+        public string Name { get; set; }
         public GameObject Owner { get; set; }
         public bool Expires { get; set; }
         public bool IsExpired { get; set; }

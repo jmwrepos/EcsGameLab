@@ -15,7 +15,10 @@ namespace EcsGameLib
         {
             return Components.OfType<T>().FirstOrDefault();
         }
-
+        public IEnumerable<T> GetComponents<T>() where T : Component
+        {
+            return Components.OfType<T>();
+        }
         public void AddComponent(Component component)
         {
             component.Owner = this;

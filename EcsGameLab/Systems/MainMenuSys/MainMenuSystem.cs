@@ -20,10 +20,10 @@ namespace EcsGameLab.Systems.MainMenuSys
             DisplayHeight = (int)display.Y;
 
             //load textures for subsequent sections:
-            var titleTexture = GraphicsLib.MakeTextureFromText("gameTitle", "These Levels", Color.Black, Color.Transparent);
-            var newTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "New", Color.Black, Color.Transparent);
-            var continueTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Continue", Color.Black, Color.Transparent);
-            var quitTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Quit", Color.Black, Color.Transparent);
+            var titleTexture = GraphicsLib.MakeTextureFromText("gameTitle", "These Levels", Color.White, Color.Transparent);
+            var newTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "New", Color.White, Color.Transparent);
+            var continueTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Continue", Color.White, Color.Transparent);
+            var quitTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Quit", Color.White, Color.Transparent);
 
             //create objects
             var bg1 = CreateGameObject("bg1", GraphicsLib.Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
@@ -59,11 +59,27 @@ namespace EcsGameLab.Systems.MainMenuSys
             contG.AddComponent(new AlignmentComponent(true, 0.65f, 0.5f));
             quitG.AddComponent(new AlignmentComponent(true, 0.8f, 0.5f));
 
-            //set entities
+
+            //add button behavior:
+            AddButtonBehavior(newG);
+            AddButtonBehavior(contG);
+            AddButtonBehavior(quitG);
+
+            //set entities and initalize components
             Entities = new() { bg1, bg2, title, animationMan, newG, contG, quitG };
+            InitializeComponents();
         }
 
+        private void AddButtonBehavior(GameObject obj)
+        {
+            FadeAnimationComponent mouseIn = new FadeAnimationComponent(AnimationNames.MouseIn, Color.Black, Color.DarkRed, 0.15f);
+            FadeAnimationComponent mouseOut = new FadeAnimationComponent(AnimationNames.MouseOut, Color.DarkRed, Color.Black, 0.15f);
+            MouseInteractionComponent mouseInteraction = new MouseInteractionComponent();
 
+            obj.AddComponent(mouseIn);
+            obj.AddComponent(mouseOut);
+            obj.AddComponent(mouseInteraction);
+        }
         public GameObject CreateGameObject(string name, Texture2D texture, int renderOrder, Color startColor, Color endColor)
         {
             return CreateGameObject(name, texture, renderOrder, startColor, endColor, Vector2.Zero, new(texture.Width, texture.Height));
@@ -72,7 +88,7 @@ namespace EcsGameLab.Systems.MainMenuSys
         {
             var obj = new GameObject() { Name = name };
             TextureComponent txt = new(texture);
-            FadeAnimationComponent fadeIn = new(Naming.FadeIn, startColor, endColor, 0.61);
+            FadeAnimationComponent fadeIn = new(AnimationNames.FadeIn, startColor, endColor, 0.61);
             ColorComponent clr = new(startColor);
 
             // Ensure that Bounds is properly initialized with position and size
@@ -87,6 +103,19 @@ namespace EcsGameLab.Systems.MainMenuSys
             return obj;
         }
 
+        public void InitializeComponents()
+        {
+            foreach(var obj in Entities)
+            {
+                foreach(var comp in obj.Components)
+                {
+                    if(comp is MouseInteractionComponent)
+                    {
+                        comp.Initialize();
+                    }
+                }
+            }
+        }
         private List<Component> ToDestroy = new();
         public void Update(GameTime gameTime)
         {
@@ -95,14 +124,8 @@ namespace EcsGameLab.Systems.MainMenuSys
             {
                 foreach(Component comp  in obj.Components)
                 {
-                    if(comp is AnimationComponent)
-                    {
-                        UpdateAnimations(obj, gameTime);
-                    }
-                    else
-                    {
-                        comp.Update(gameTime);
-                    }
+                    comp.Update(gameTime);
+                   
                     if (comp.IsExpired)
                     {
                         ToDestroy.Add(comp);
@@ -112,15 +135,6 @@ namespace EcsGameLab.Systems.MainMenuSys
             foreach(Component toDestroy in ToDestroy)
             {
                 toDestroy.Owner.Components.Remove(toDestroy);
-            }
-        }
-
-        private void UpdateAnimations(GameObject obj, GameTime gameTime)
-        {
-            var fade = obj.GetComponent<FadeAnimationComponent>();
-            if(fade.HasStarted && !fade.HasFinished)
-            {
-                fade.Update(gameTime);
             }
         }
 
@@ -140,6 +154,7 @@ namespace EcsGameLab.Systems.MainMenuSys
 
             if (textureComponent != null && colorComponent != null && transformComponent != null)
             {
+                EscLabLogger.Log($"Drawing {gameObject.Name} with color {colorComponent.Color}");
                 spriteBatch.Draw(
                     textureComponent.Texture,
                     destinationRectangle: transformComponent.Bounds,

@@ -9,7 +9,6 @@ namespace EcsGameLab.Components
             Name = name;
         }
 
-        public string Name { get; set; }
         public bool HasStarted { get; set; }
         public bool HasFinished { get; set; }
         public double Duration { get; set; }

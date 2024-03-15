@@ -16,9 +16,9 @@ namespace EcsGameLab.Components
         }
         public override void Update(GameTime gameTime)
         {
-            if(HasStarted && !HasFinished)
+            if (HasStarted && !HasFinished)
             {
-                double elapsedTime = gameTime.TotalGameTime.TotalSeconds - StartTime;
+                double elapsedTime = gameTime.TotalGameTime.TotalSeconds - StartTime;   
                 double progress = Math.Min(1, elapsedTime / Duration);
                 Color currentColor = Color.Lerp(StartColor, EndColor, (float)progress);
                 var colorComponent = Owner?.GetComponent<ColorComponent>();
@@ -29,8 +29,7 @@ namespace EcsGameLab.Components
 
                 if (progress >= 1)
                 {
-                    HasFinished = true;
-                    EscLabLogger.Log($"Ending Animation for {Owner.Name}");
+                    HasFinished = true;                    
                 }
             }
         }
