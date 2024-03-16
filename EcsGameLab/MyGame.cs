@@ -19,8 +19,8 @@ namespace EcsGameLab
             IsMouseVisible = true;
             _mainMenuSystem = new();
 
-            _graphics.PreferredBackBufferWidth = 1920;
-            _graphics.PreferredBackBufferWidth = 1080;
+            _graphics.PreferredBackBufferWidth = (int)(GraphicsLib.DesignSize.X * 1.5);
+            _graphics.PreferredBackBufferHeight = (int)(GraphicsLib.DesignSize.Y * 1.5);
             _graphics.ApplyChanges();
         }
 
@@ -48,6 +48,8 @@ namespace EcsGameLab
 
             // TODO: Add your update logic here
             _mainMenuSystem.Update(gameTime);
+            if (_mainMenuSystem.Quit)
+                Exit();
             base.Update(gameTime);
         }
         protected override void Draw(GameTime gameTime)

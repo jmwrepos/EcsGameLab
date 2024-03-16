@@ -92,44 +92,54 @@ namespace EcsGameLab.Components
                 if (_previousMouseState.LeftButton == ButtonState.Released && currentMouseState.LeftButton == ButtonState.Pressed)
                 {
                     _mouseLeftDown?.StartAnimation(gameTime);
+                    _mouseLeftUp?.Reset();  
                 }
                 // Left button up
                 if (_previousMouseState.LeftButton == ButtonState.Pressed && currentMouseState.LeftButton == ButtonState.Released)
                 {
                     _mouseLeftUp?.StartAnimation(gameTime);
+                    var onClick = Owner.GetComponent<OnClickComponent>();
+                    onClick.Clicked = true;
+                    _mouseLeftDown?.Reset();
                 }
 
                 // Right button down
                 if (_previousMouseState.RightButton == ButtonState.Released && currentMouseState.RightButton == ButtonState.Pressed)
                 {
                     _mouseRightDown?.StartAnimation(gameTime);
+                    _mouseRightUp?.Reset();
                 }
                 // Right button up
                 if (_previousMouseState.RightButton == ButtonState.Pressed && currentMouseState.RightButton == ButtonState.Released)
                 {
                     _mouseRightUp?.StartAnimation(gameTime);
+                    _mouseRightDown?.Reset();
                 }
 
                 // Middle button down
                 if (_previousMouseState.MiddleButton == ButtonState.Released && currentMouseState.MiddleButton == ButtonState.Pressed)
                 {
                     _mouseMiddleDown?.StartAnimation(gameTime);
+                    _mouseMiddleUp?.Reset();
                 }
                 // Middle button up
                 if (_previousMouseState.MiddleButton == ButtonState.Pressed && currentMouseState.MiddleButton == ButtonState.Released)
                 {
                     _mouseMiddleUp?.StartAnimation(gameTime);
+                    _mouseMiddleDown?.Reset();
                 }
 
                 // Scroll wheel up - this is a simplified example and might need to be adjusted based on your definition of "scroll up"
                 if (currentMouseState.ScrollWheelValue > _previousMouseState.ScrollWheelValue)
                 {
                     _mouseScrollUp?.StartAnimation(gameTime);
+                    _mouseScrollDown?.Reset();
                 }
                 // Scroll wheel down
                 if (currentMouseState.ScrollWheelValue < _previousMouseState.ScrollWheelValue)
                 {
                     _mouseScrollDown?.StartAnimation(gameTime);
+                    _mouseScrollUp?.Reset();
                 }
 
             }

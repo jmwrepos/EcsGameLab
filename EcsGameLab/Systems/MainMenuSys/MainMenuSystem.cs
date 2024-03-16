@@ -4,6 +4,7 @@ using EcsGameLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using static EcsGameLab.Statics.GraphicsLib;
 
 namespace EcsGameLab.Systems.MainMenuSys
 {
@@ -12,26 +13,30 @@ namespace EcsGameLab.Systems.MainMenuSys
         public List<GameObject> Entities { get; set; }
         private int DisplayWidth { get; set; }
         private int DisplayHeight { get; set; }
+        public bool Quit { get; set; }
         public void LoadContent()
         {
-            //set display propertie
-            var display = GraphicsLib.GetDisplaySize;
+            //set display properties
+            var display = GetDisplaySize;
             DisplayWidth = (int)display.X;
             DisplayHeight = (int)display.Y;
 
+
+            //load textured background
+            var textureRect = GetStatic("mainMenuTextureRect");
             //load textures for subsequent sections:
-            var titleTexture = GraphicsLib.MakeTextureFromText("gameTitle", "These Levels", Color.White, Color.Transparent);
-            var newTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "New", Color.White, Color.Transparent);
-            var continueTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Continue", Color.White, Color.Transparent);
-            var quitTexture = GraphicsLib.MakeTextureFromText("mainMenuOption", "Quit", Color.White, Color.Transparent);
+            var titleTexture = MakeTextureFromText(FontPaths.MainMenuTitle, GlobalMisc.GameTitle, Color.White, Color.Transparent);
+            var newTexture = MakeTextureFromText(FontPaths.MainMenuOption, GlobalMisc.BtnMainMenuNew, Color.White, Color.Transparent);
+            var continueTexture = MakeTextureFromText(FontPaths.MainMenuOption, GlobalMisc.BtnMainMenuCont, Color.White, Color.Transparent);
+            var quitTexture = MakeTextureFromText(FontPaths.MainMenuOption, GlobalMisc.BtnMainMenuQuit, Color.White, Color.Transparent);
 
             //create objects
-            var bg1 = CreateGameObject("bg1", GraphicsLib.Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
-            var bg2 = CreateGameObject("bg2", GraphicsLib.Pixel, 1, Color.Transparent, Color.Yellow, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
-            var title = CreateGameObject("title", titleTexture, 2, Color.Transparent, Color.Black);
-            var newG = CreateGameObject("new", newTexture, 2, Color.Transparent, Color.Black);
-            var contG = CreateGameObject("continue", continueTexture, 2, Color.Transparent, Color.Black);
-            var quitG = CreateGameObject("quit", quitTexture, 2, Color.Transparent, Color.Black);
+            var bg1 = CreateGameObject(ObjectNames.MainMenuBackground, Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
+            var bg2 = CreateGameObject(ObjectNames.MainMenuBackground2, textureRect, 1, Color.Transparent, Pallette.MainMenuBlue, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
+            var title = CreateGameObject(ObjectNames.MainMenuTitle, titleTexture, 2, Color.Transparent, Pallette.MainMenuLightBlue);
+            var newG = CreateGameObject(ObjectNames.MainMenuOptNew, newTexture, 2, Color.Transparent, Pallette.MainMenuLightBlue);
+            var contG = CreateGameObject(ObjectNames.MainMenuOptCont, continueTexture, 2, Color.Transparent, Pallette.MainMenuLightBlue);
+            var quitG = CreateGameObject(ObjectNames.MainMenuOptQuit, quitTexture, 2, Color.Transparent, Pallette.MainMenuLightBlue);
             var animationMan = new GameObject();
 
             //create animation tree component to manage the menu fade in
@@ -53,6 +58,12 @@ namespace EcsGameLab.Systems.MainMenuSys
             animationTree.AddAnimationNode(a5, a2);
             animationTree.AddAnimationNode(a6, a2);
 
+            //display scaling
+            title.AddComponent(new ScaleToDisplayComponent());
+            newG.AddComponent(new ScaleToDisplayComponent());
+            contG.AddComponent(new ScaleToDisplayComponent());
+            quitG.AddComponent(new ScaleToDisplayComponent());
+
             //alignments
             title.AddComponent(new AlignmentComponent(true, 0.1f, 0.5f));
             newG.AddComponent(new AlignmentComponent(true, 0.5f, 0.5f));
@@ -72,13 +83,21 @@ namespace EcsGameLab.Systems.MainMenuSys
 
         private void AddButtonBehavior(GameObject obj)
         {
-            FadeAnimationComponent mouseIn = new FadeAnimationComponent(AnimationNames.MouseIn, Color.Black, Color.DarkRed, 0.15f);
-            FadeAnimationComponent mouseOut = new FadeAnimationComponent(AnimationNames.MouseOut, Color.DarkRed, Color.Black, 0.15f);
+            FadeAnimationComponent mouseIn = new FadeAnimationComponent(AnimationNames.MouseIn, Pallette.MainMenuLightBlue, Color.Cyan, 0.15f);
+            FadeAnimationComponent mouseOut = new FadeAnimationComponent(AnimationNames.MouseOut, Color.Cyan, Pallette.MainMenuLightBlue, 0.15f);
+            FadeAnimationComponent mouseLeftDown = new FadeAnimationComponent(AnimationNames.MouseLeftDown, Color.Cyan, Color.DarkCyan, 0.15f);
+            FadeAnimationComponent mouseLeftUp = new FadeAnimationComponent(AnimationNames.MouseLeftUp, Color.DarkCyan, Color.Cyan, 0.15f);
             MouseInteractionComponent mouseInteraction = new MouseInteractionComponent();
+
 
             obj.AddComponent(mouseIn);
             obj.AddComponent(mouseOut);
+            obj.AddComponent(mouseLeftDown);
+            obj.AddComponent(mouseLeftUp);
             obj.AddComponent(mouseInteraction);
+
+            OnClickComponent onClick = new(obj.Name);
+            obj.AddComponent(onClick);
         }
         public GameObject CreateGameObject(string name, Texture2D texture, int renderOrder, Color startColor, Color endColor)
         {
@@ -130,6 +149,21 @@ namespace EcsGameLab.Systems.MainMenuSys
                     {
                         ToDestroy.Add(comp);
                     }
+                    if(comp is OnClickComponent)
+                    {
+                        var onClick = ((OnClickComponent)comp);
+                        if (onClick.Clicked)
+                        {
+                            switch (onClick.Name)
+                            {
+                                case ObjectNames.MainMenuOptQuit:
+                                    Quit = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
                 }
             }
             foreach(Component toDestroy in ToDestroy)
@@ -154,7 +188,6 @@ namespace EcsGameLab.Systems.MainMenuSys
 
             if (textureComponent != null && colorComponent != null && transformComponent != null)
             {
-                EscLabLogger.Log($"Drawing {gameObject.Name} with color {colorComponent.Color}");
                 spriteBatch.Draw(
                     textureComponent.Texture,
                     destinationRectangle: transformComponent.Bounds,

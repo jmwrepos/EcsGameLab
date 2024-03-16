@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace EcsGameLab.Statics
 {
@@ -8,6 +9,8 @@ namespace EcsGameLab.Statics
     {
         private static ContentManager _content;
         private static GraphicsDeviceManager _graphics;
+
+        public static Vector2 DesignSize = new Vector2(1920, 1080);
         public static Vector2 GetDisplaySize => new(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
         public static void SetManagers(ContentManager contentManager, GraphicsDeviceManager graphicsDeviceManager) => (_content, _graphics) = (contentManager, graphicsDeviceManager);
         public static void SetPixel()
@@ -61,6 +64,7 @@ namespace EcsGameLab.Statics
         {
             public static string Circ30x30 = "circ_30x30";
             public static string MainMenuNew = "mainMenuNew";
+            public static string MainMenuBlueRect = "mainMenuTextureRect";
         }
         
         //ANIMATIONS
@@ -70,6 +74,12 @@ namespace EcsGameLab.Statics
             public static string CicleShrink = "circle_shrink";
             public static string CircleUngrow = "circle_ungrow";
             public static string CircleUnshrink = "circle_unshrink";
+        }
+
+        public static class Pallette
+        {
+            public static Color MainMenuBlue = new(72, 158, 255, 255);
+            public static Color MainMenuLightBlue = new(175, 245, 255, 255);
         }
     }
 }
