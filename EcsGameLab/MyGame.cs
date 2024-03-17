@@ -1,8 +1,12 @@
 ﻿using EcsGameLab.Statics;
+using EcsGameLab.Systems;
+using EcsGameLab.Systems.LevelSys;
 using EcsGameLab.Systems.MainMenuSys;
+using EcsGameLab.Systems.PlayerSys;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace EcsGameLab
 {
@@ -10,17 +14,36 @@ namespace EcsGameLab
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private MainMenuSystem _mainMenuSystem;
+        private List<ISystem> Systems = new();
 
+        private MainMenuSystem _mainMenuSystem;
+        private LevelSystem _levelSystem;
+        private PlayerSystem _playerSystem;
+
+        public void StartGame()
+        {
+            _mainMenuSystem.Active = false;
+            _levelSystem.Active = true;
+            _playerSystem.Active = true;
+        }
         public MyGame()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            _mainMenuSystem = new();
-
             _graphics.PreferredBackBufferWidth = (int)(GraphicsLib.DesignSize.X * 1.5);
             _graphics.PreferredBackBufferHeight = (int)(GraphicsLib.DesignSize.Y * 1.5);
+
+
+            _mainMenuSystem = new MainMenuSystem(this);
+            Systems.Add(_mainMenuSystem);
+
+            _levelSystem = new LevelSystem();
+            Systems.Add(_levelSystem);
+
+            _playerSystem = new PlayerSystem();
+            Systems.Add(_playerSystem);
+
             _graphics.ApplyChanges();
         }
 
@@ -38,6 +61,8 @@ namespace EcsGameLab
             GraphicsLib.SetPixel();
             //loading
             _mainMenuSystem.LoadContent();
+            _levelSystem.LoadContent();
+            _playerSystem.LoadContent();
             
         }
 
@@ -47,20 +72,21 @@ namespace EcsGameLab
                 Exit();
 
             // TODO: Add your update logic here
-            _mainMenuSystem.Update(gameTime);
-            if (_mainMenuSystem.Quit)
-                Exit();
+            foreach(ISystem system in Systems)
+            {
+                system.Update(gameTime);
+            }
             base.Update(gameTime);
         }
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
             // Start the SpriteBatch with alpha blending enabled
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-
-            _mainMenuSystem.Draw(_spriteBatch);
-
+            foreach(ISystem system in Systems)
+            {
+                system.Draw(_spriteBatch);
+            }
             _spriteBatch.End();
             base.Draw(gameTime);
         }

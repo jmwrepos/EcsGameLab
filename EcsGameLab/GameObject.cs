@@ -3,11 +3,13 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using EcsGameLab.Components;
+using System;
 
 namespace EcsGameLib
 {
     public class GameObject
     {
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string Name { get; set; } = string.Empty;
         public List<Component> Components { get; private set; } = new List<Component>();
 

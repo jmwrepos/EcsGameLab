@@ -40,6 +40,12 @@ namespace EcsGameLab.Components
         {
             Bounds = new Rectangle((int)_position.X, (int)_position.Y, (int)_size.X, (int)_size.Y);
         }
+        public void UpdateBounds(Rectangle bounds)
+        {
+            _size = new(bounds.Width, bounds.Height);
+            _position = new(bounds.X, bounds.Y);
+            Bounds = bounds;
+        }
     }
 
 }

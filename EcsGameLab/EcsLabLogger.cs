@@ -3,7 +3,7 @@ using System.IO;
 
 namespace EcsGameLab
 {
-    public static class EscLabLogger
+    public static class EcsLabLogger
     {
         private static readonly string logFilePath = Path.Combine(Environment.CurrentDirectory, "log.txt");
 

@@ -8,12 +8,19 @@ using static EcsGameLab.Statics.GraphicsLib;
 
 namespace EcsGameLab.Systems.MainMenuSys
 {
-    public class MainMenuSystem
+    public class MainMenuSystem : ISystem
     {
+        public bool Active { get; set; } = true;
         public List<GameObject> Entities { get; set; }
         private int DisplayWidth { get; set; }
         private int DisplayHeight { get; set; }
         public bool Quit { get; set; }
+        private MyGame _game;
+
+        public MainMenuSystem(MyGame game)
+        {
+            _game = game;
+        }
         public void LoadContent()
         {
             //set display properties
@@ -32,7 +39,7 @@ namespace EcsGameLab.Systems.MainMenuSys
 
             //create objects
             var bg1 = CreateGameObject(ObjectNames.MainMenuBackground, Pixel, 0, Color.Transparent, Color.Black, Vector2.Zero, new(DisplayWidth, DisplayHeight));
-            var bg2 = CreateGameObject(ObjectNames.MainMenuBackground2, textureRect, 1, Color.Transparent, Pallette.MainMenuBlue, new(25,25), new(DisplayWidth - 50, DisplayHeight - 50));
+            var bg2 = CreateGameObject(ObjectNames.MainMenuBackground2, textureRect, 1, Color.Transparent, Pallette.MainMenuBlue, new(25, 25), new(DisplayWidth - 50, DisplayHeight - 50));
             var title = CreateGameObject(ObjectNames.MainMenuTitle, titleTexture, 2, Color.Transparent, Pallette.MainMenuLightBlue);
             var newG = CreateGameObject(ObjectNames.MainMenuOptNew, newTexture, 2, Color.Transparent, Pallette.MainMenuLightBlue);
             var contG = CreateGameObject(ObjectNames.MainMenuOptCont, continueTexture, 2, Color.Transparent, Pallette.MainMenuLightBlue);
@@ -106,7 +113,7 @@ namespace EcsGameLab.Systems.MainMenuSys
         public GameObject CreateGameObject(string name, Texture2D texture, int renderOrder, Color startColor, Color endColor, Vector2 position, Vector2 size)
         {
             var obj = new GameObject() { Name = name };
-            TextureComponent txt = new(texture);
+            TextureComponent txt = new(name, texture);
             FadeAnimationComponent fadeIn = new(AnimationNames.FadeIn, startColor, endColor, 0.61);
             ColorComponent clr = new(startColor);
 
@@ -124,11 +131,11 @@ namespace EcsGameLab.Systems.MainMenuSys
 
         public void InitializeComponents()
         {
-            foreach(var obj in Entities)
+            foreach (var obj in Entities)
             {
-                foreach(var comp in obj.Components)
+                foreach (var comp in obj.Components)
                 {
-                    if(comp is MouseInteractionComponent)
+                    if (comp is MouseInteractionComponent)
                     {
                         comp.Initialize();
                     }
@@ -138,45 +145,54 @@ namespace EcsGameLab.Systems.MainMenuSys
         private List<Component> ToDestroy = new();
         public void Update(GameTime gameTime)
         {
-            ToDestroy.Clear();
-            foreach(GameObject obj in Entities)
+            if (Active)
             {
-                foreach(Component comp  in obj.Components)
+                ToDestroy.Clear();
+                foreach (GameObject obj in Entities)
                 {
-                    comp.Update(gameTime);
-                   
-                    if (comp.IsExpired)
+                    foreach (Component comp in obj.Components)
                     {
-                        ToDestroy.Add(comp);
-                    }
-                    if(comp is OnClickComponent)
-                    {
-                        var onClick = ((OnClickComponent)comp);
-                        if (onClick.Clicked)
+                        comp.Update(gameTime);
+
+                        if (comp.IsExpired)
                         {
-                            switch (onClick.Name)
+                            ToDestroy.Add(comp);
+                        }
+                        if (comp is OnClickComponent)
+                        {
+                            var onClick = ((OnClickComponent)comp);
+                            if (onClick.Clicked)
                             {
-                                case ObjectNames.MainMenuOptQuit:
-                                    Quit = true;
-                                    break;
-                                default:
-                                    break;
+                                switch (onClick.Name)
+                                {
+                                    case ObjectNames.MainMenuOptQuit:
+                                        _game.Exit();
+                                        break;
+                                    case ObjectNames.MainMenuOptNew:
+                                        _game.StartGame();
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
                         }
                     }
                 }
-            }
-            foreach(Component toDestroy in ToDestroy)
-            {
-                toDestroy.Owner.Components.Remove(toDestroy);
+                foreach (Component toDestroy in ToDestroy)
+                {
+                    toDestroy.Owner.Components.Remove(toDestroy);
+                }
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            foreach(GameObject obj in Entities)
+            if (Active)
             {
-                DrawGameObject(spriteBatch, obj);
+                foreach (GameObject obj in Entities)
+                {
+                    DrawGameObject(spriteBatch, obj);
+                }
             }
         }
 

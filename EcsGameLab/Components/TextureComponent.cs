@@ -9,7 +9,7 @@ namespace EcsGameLab.Components
         public int Width => Texture.Width;
         public int Height => Texture.Height;
 
-        public TextureComponent(Texture2D texture, bool expires = false) : base(expires)
+        public TextureComponent(string name, Texture2D texture, bool expires = false) : base(expires)
         {
             Texture = texture;
         }
